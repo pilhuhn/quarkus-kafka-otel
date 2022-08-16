@@ -39,8 +39,8 @@ public class KafkaReceiver {
 
                 System.out.println("TraceId " + Span.current().getSpanContext().getTraceId());
 
-                // Haven't seen it twice, so process again
-                if (body.contains("P") && body.indexOf("P") == body.lastIndexOf("P")) {
+                // Process again if needed
+                if (shouldForwardAgain(body)) {
 
                     // We need to use a Message to emit
                     Message<String> out = Message.of(body);
@@ -54,5 +54,10 @@ public class KafkaReceiver {
             }
         }
         return message.ack();
+    }
+
+    private static boolean shouldForwardAgain(String body) {
+        // If the message is "Hello World  from Python  from Python" then we have seen it already
+        return body.contains("P") && body.indexOf("P") == body.lastIndexOf("P");
     }
 }
